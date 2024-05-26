@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'board',
 
     # Third party apps
-    'django-extensions',
+    'django_extensions',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -79,11 +79,17 @@ WSGI_APPLICATION = 'zerowavebackend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+import os
+os.environ.get("key")
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.environ.get("DB_ENGINE"),
+        'NAME': 'zerowaveboard',
+        'USER' : os.environ.get("DB_USER"),
+        'PASSWORD' : os.environ.get("DB_PASSWORD"),
+        'HOST' : os.environ.get("localhost"),
+        'PORT' : os.environ.get("DB_PORT")
     }
 }
 
