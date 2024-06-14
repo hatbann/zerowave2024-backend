@@ -25,3 +25,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def update(self, instance, validated_data):
+        # 5.
+        
+        # 6.
+        for (key, value) in validated_data.items():
+            # 7.
+            setattr(instance, key, value)
+
+
+        # 9.
+        instance.save()
+
+        return instance
+    
+
+class UserProfileSerializer(serializers.ModelSerializer): 
+     class Meta:
+        model=User
+        fields=['id','email','nickname']

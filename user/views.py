@@ -7,8 +7,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import RegisterSerializer
+from rest_framework_simplejwt.views import TokenRefreshView
+from .serializer import RegisterSerializer, UserProfileSerializer, UserSerializer
+from django.contrib.auth import authenticate
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import  IsAuthenticated
+from tokenize import TokenError
+from jwt import InvalidTokenError
 
 # Create your views here.
 class RegisterAPIView(APIView):
@@ -37,20 +42,77 @@ class RegisterAPIView(APIView):
             res.set_cookie("refresh", refresh_token, httponly=True)
             return res
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-def login(request):
-    response_data = {}
-    
-    if request.method == "POST":
-        login_email = request.POST.get('email', None)
-        login_password = request.POST.get('password', None)
 
-        user = ZerowaveUser.objects.get(email = login_email)
-        if not check_password(login_password, user.password) :
-            response_data['error'] = "이메일 혹은 비밀번호가 틀렸습니다."
-          
-        else :
-            request.session['user'] = user.id
-            
+class AuthView(APIView):
+
+    def post(self, request):
+        user = authenticate(
+            email=request.data.get("email"), password=request.data.get("password")
+        )
+        if user is not None:
+            serializer = UserSerializer(user)
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+            res = Response(
+                {
+                    "user": serializer.data,
+                    "message": "login success",
+                    "token": {
+                        "access": access_token,
+                        "refresh": refresh_token,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+            return res
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+    
+    
+    def patch(self, request, *args, **kwargs):
+        serializer_data = request.data
+ 
+        serializer = self.serializer_class(
+            request.user, data=serializer_data, partial=True
+        )
+        
+        serializer.is_valid(raise_exception=True)
+        
+        serializer.save()
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request) -> Response:
+        print(request.data)
+        refresh_token = request.data.get("refresh")
+        data = {"refresh": refresh_token}
+        serializer = self.get_serializer(data= data)
+
+        try:
+            serializer.is_valid(raise_exception= True)
+        except TokenError as e:
+            raise InvalidTokenError(e.args[0])
+
+        token = serializer.validated_data
+        response = Response({"detail": "refresh success", "access" : token['access'], "refresh" : token['refresh']}, status= status.HTTP_200_OK)
+
+        return response
+
+class MyProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        print(request.user)
+        serializer = UserProfileSerializer(request.user)
+        return Response({'message': '프로필 가져오기 성공', 'data': serializer.data}, status=status.HTTP_200_OK)
+
     
 
 
