@@ -14,6 +14,8 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import  IsAuthenticated
 from tokenize import TokenError
 from jwt import InvalidTokenError
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 # Create your views here.
 class RegisterAPIView(APIView):
@@ -112,6 +114,21 @@ class MyProfileView(APIView):
         print(request.user)
         serializer = UserProfileSerializer(request.user)
         return Response({'message': '프로필 가져오기 성공', 'data': serializer.data}, status=status.HTTP_200_OK)
+
+class UserProfileView(APIView):
+    def get(self, request, format=None):
+        #userpk = request.GET.get('id__in[]')
+        if(request.query_params.get('id__in[]')) : 
+            userpk = request.query_params.get('id__in[]').split(',')
+            list_int = list(map(int, userpk)) # 정수로 변환
+            users = ZerowaveUser.objects.values('id', 'nickname').filter(id__in=list_int)
+            serialized_q = json.dumps(list(users), cls=DjangoJSONEncoder)
+            return Response({'message': '프로필 가져오기 성공', 'data': serialized_q}, status=status.HTTP_200_OK)
+        else:
+            userpk = request.query_params.get('id')
+            user = ZerowaveUser.objects.values('id' , 'nickname').filter(id=userpk)
+            serialized_q = json.dumps(list(user), cls=DjangoJSONEncoder)
+            return Response({'message': '프로필 가져오기 성공', 'data': serialized_q}, status=status.HTTP_200_OK)
 
     
 

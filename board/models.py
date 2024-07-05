@@ -9,6 +9,7 @@ class BoardModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     author = models.ForeignKey('user.ZerowaveUser', on_delete=models.CASCADE, related_name='author_of')
     location = models.CharField(max_length=100, blank=True, default='')
+    address = models.CharField(max_length=100, blank=True, default='')
 
 
     def increase_view_count(self):
