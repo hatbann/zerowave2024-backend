@@ -147,11 +147,12 @@ os.environ.get("key")
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hhbbcho$zerowave',
-        'USER' : 'hhbbcho',
-        'PASSWORD' : os.environ.get("DB_PASSWORD"),
-        'HOST' : "hhbbcho.mysql.pythonanywhere-services.com",
+   'ENGINE': os.environ.get("DB_ENGINE"),
+    'NAME': 'zerowaveboard',
+    'USER' : os.environ.get("DB_USER"),
+    'PASSWORD' : os.environ.get("DB_PASSWORD"),
+    'HOST' : os.environ.get("localhost"),
+    'PORT' : os.environ.get("DB_PORT")
     }
 }
 
