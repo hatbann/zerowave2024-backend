@@ -17,7 +17,10 @@ class PostList(APIView):
     def get(self, request):
         posts = BoardModel.objects.all()
         # 여러 개의 객체를 serialization하기 위해 many=True로 설정
-        serializer = PostSerializer(posts, many=True)
+  
+        order_cond = request.GET.get('order_by', None)
+        if(order_cond == None): order_cond = '-created_at'
+        serializer = PostSerializer(posts.order_by(order_cond), many=True)
         return Response(serializer.data)
 
     # 새 글 작성
@@ -29,6 +32,7 @@ class PostList(APIView):
             'content': request.data.get('content'),
             'location': request.data.get('location'),
             'author': request.data.get("author"),
+            'address' : request.data.get("address"),
         }
         serializer = PostSerializer(data=data)
         if serializer.is_valid(): #유효성 검사
@@ -48,7 +52,12 @@ class PostDetail(APIView):
     #  detail 보기
     def get(self, request, pk, format=None):
         post = self.get_object(pk)
+
+        post.views += 1
+        post.save()
         serializer = PostSerializer(post)
+
+        
         return Response(serializer.data)
 
     #  수정하기

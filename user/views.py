@@ -77,7 +77,6 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
     
-    
     def patch(self, request, *args, **kwargs):
         serializer_data = request.data
  
@@ -130,7 +129,15 @@ class UserProfileView(APIView):
             serialized_q = json.dumps(list(user), cls=DjangoJSONEncoder)
             return Response({'message': '프로필 가져오기 성공', 'data': serialized_q}, status=status.HTTP_200_OK)
 
-    
+class LogoutView(APIView):
+
+    def post(self, request):
+        response = Response({
+            "message": "Logout success"
+            },  status=status.HTTP_200_OK)
+        response.delete_cookie('refreshtoken')
+
+        return response
 
 
 def home(request):
