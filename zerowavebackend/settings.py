@@ -20,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 from django.core.exceptions import ImproperlyConfigured
 import json
+import os
 secret_file = os.path.join(BASE_DIR, 'secrets.json')
 
 with open(secret_file) as f:
@@ -35,7 +36,7 @@ def get_secret(setting, secrets=secrets):
 SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', '.pythonanywhere.com']
 
@@ -146,12 +147,11 @@ os.environ.get("key")
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get("DB_ENGINE"),
-        'NAME': 'zerowaveboard',
-        'USER' : os.environ.get("DB_USER"),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hhbbcho$zerowave',
+        'USER' : 'hhbbcho',
         'PASSWORD' : os.environ.get("DB_PASSWORD"),
-        'HOST' : os.environ.get("localhost"),
-        'PORT' : os.environ.get("DB_PORT")
+        'HOST' : "hhbbcho.mysql.pythonanywhere-services.com",
     }
 }
 
